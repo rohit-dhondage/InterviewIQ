@@ -1,12 +1,10 @@
 package com.example.rohit.InterviewIQ.Controller;
 
+import com.example.rohit.InterviewIQ.DTO.LoginRequest;
 import com.example.rohit.InterviewIQ.Model.User;
 import com.example.rohit.InterviewIQ.Service.Authentication;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController()
 @RequestMapping("/auth")
@@ -20,5 +18,11 @@ public class UserController {
     public ResponseEntity<User> regester(@RequestBody User user){
         authentication.regester(user);
         return   ResponseEntity.ok(user);
+    }
+
+
+    @GetMapping("/login")
+    public String login(@RequestBody LoginRequest loginRequest) {
+       return authentication.login(loginRequest);
     }
 }
