@@ -24,4 +24,12 @@ return Jwts.builder()
         .compact();
 
     }
+
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretkey)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
 }

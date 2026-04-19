@@ -37,7 +37,7 @@ user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         User user = userOptional.get();
 
-        if (!user.getPassword().matches(loginRequest.getPassword())){
+        if (!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())){
             throw new RuntimeException("Invalid Password");
         }
 
