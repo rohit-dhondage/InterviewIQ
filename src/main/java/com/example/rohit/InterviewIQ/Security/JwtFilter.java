@@ -5,10 +5,16 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
+@Component
 public class JwtFilter extends OncePerRequestFilter {
 
     JwtUtil jwtUtil;
@@ -17,18 +23,29 @@ public class JwtFilter extends OncePerRequestFilter {
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String header = request.getHeader("Authentication");
+        String header = request.getHeader("Authorization");
         if(header != null && header.startsWith("Bearer ")) {
 
             // read header ,
             String token = header.substring(7);
 
             //extract email
-            String email = jwtUtil.extractEmail(token);
+            try {
+                String email = jwtUtil.extractEmail(token);
 
-            if (email != null) {
-                // We will attach user to security context (next step)
-                System.out.println("Valid token for: " + email);
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                email,
+                                null,
+                                Collections.singletonList(new SimpleGrantedAuthority("USER"))
+                        );
+                System.out.println("done   ");
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            } catch (Exception e) {
+                // 🔥 IMPORTANT: just ignore invalid token
+                System.out.println("Invalid JWT token");
             }
         }
         filterChain.doFilter(request, response);

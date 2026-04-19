@@ -26,7 +26,7 @@ JwtFilter jwtFilter;
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth","/register", "/login").permitAll()
+                        .requestMatchers("/auth**","/auth/register", "/auth/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

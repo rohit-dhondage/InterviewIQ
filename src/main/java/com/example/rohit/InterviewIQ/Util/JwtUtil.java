@@ -1,33 +1,34 @@
 package com.example.rohit.InterviewIQ.Util;
 
-import com.example.rohit.InterviewIQ.DTO.LoginRequest;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.experimental.UtilityClass;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
 import java.util.Date;
 
-import static java.security.KeyRep.Type.SECRET;
+@Component
+public class JwtUtil {
 
+    private final String secretKey = "myverystrongsecretkeythatshouldbeatleast32characterslong";
 
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
-@Component public class JwtUtil {
-    private final String secretkey = "myverystrongsecretkeythatshouldbeatleast32characterslong";
-
-    public String generatetoken(String email){
-return Jwts.builder()
-        .setSubject(email)
-        .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-        .signWith(SignatureAlgorithm.HS256, secretkey)
-        .compact();
-
+    public String generateToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String extractEmail(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretkey)
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();

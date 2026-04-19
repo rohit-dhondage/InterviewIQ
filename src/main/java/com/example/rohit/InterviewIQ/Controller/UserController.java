@@ -21,8 +21,14 @@ public class UserController {
     }
 
 
-    @GetMapping("/login")
+    @PutMapping("/login")
     public String login(@RequestBody LoginRequest loginRequest) {
        return authentication.login(loginRequest);
+    }
+
+
+    @GetMapping("/test")
+    public String test() {
+        return "Protected API working";
     }
 }

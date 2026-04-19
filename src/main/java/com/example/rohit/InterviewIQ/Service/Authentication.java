@@ -41,6 +41,6 @@ user.setPassword(passwordEncoder.encode(user.getPassword()));
             throw new RuntimeException("Invalid Password");
         }
 
-        return jwtUtil.generatetoken(loginRequest.getEmail());
+        return jwtUtil.generateToken(loginRequest.getEmail());
     }
 }
