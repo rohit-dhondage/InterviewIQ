@@ -76,6 +76,7 @@ public class ResumeService {
         if (extractedText == null || extractedText.trim().isEmpty()) {
             throw new IllegalArgumentException(
                 "No text could be extracted from this PDF. " +
+
                 "If your resume is a scanned image, please use a text-based PDF."
             );
         }
