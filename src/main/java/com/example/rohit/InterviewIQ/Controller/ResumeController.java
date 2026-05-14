@@ -2,7 +2,7 @@ package com.example.rohit.InterviewIQ.Controller;
 
 import com.example.rohit.InterviewIQ.DTO.ResumeUploadResponse;
 import com.example.rohit.InterviewIQ.Service.ResumeService;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,34 +47,10 @@ public class ResumeController {
      */
     @PostMapping("/upload")
     public ResponseEntity<?> uploadResume(
-            // @RequestParam("file") maps the "file" field from the multipart form to this parameter
-            // MultipartFile is Spring's abstraction for an uploaded file
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) throws IOException {
 
-        try {
-            // Delegate to service — controller just passes data and returns the result
-            ResumeUploadResponse response = resumeService.processResume(file);
-
-            // ResponseEntity.ok() = HTTP 200 OK + body as JSON
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            // IllegalArgumentException = client sent bad data (wrong file type, empty file, etc.)
-            // We return 400 Bad Request with the error message so the client knows what they did wrong
-            // .badRequest() = HTTP 400
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
-
-        } catch (IOException e) {
-            // IOException = something went wrong reading the file on the server side
-            // This is a SERVER error, so we return 500 Internal Server Error
-            // We do NOT expose raw exception messages to clients in production (security risk)
-            // In production you'd log this with a proper logger (SLF4J/Logback)
-            System.err.println("Error reading PDF: " + e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to process the uploaded file. Please try again.");
-        }
+        // Delegate to service — controller just passes data and returns the result
+        ResumeUploadResponse response = resumeService.processResume(file);
+        return ResponseEntity.ok(response);
     }
 }
