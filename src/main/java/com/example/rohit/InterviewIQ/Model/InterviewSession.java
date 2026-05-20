@@ -3,6 +3,7 @@ package com.example.rohit.InterviewIQ.Model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity(name = "interview_sessions")
 @Builder
@@ -33,6 +34,9 @@ public class InterviewSession {
     private String aiFeedback;
 
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions;
 
     @PrePersist
     protected void onCreate() {

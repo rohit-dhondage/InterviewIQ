@@ -1,6 +1,7 @@
 package com.example.rohit.InterviewIQ.Service;
 
 import com.example.rohit.InterviewIQ.DTO.LoginRequest;
+import com.example.rohit.InterviewIQ.Exception.ResourceNotFoundException;
 import com.example.rohit.InterviewIQ.Model.User;
 import com.example.rohit.InterviewIQ.Repository.UserRepository;
 import com.example.rohit.InterviewIQ.Util.JwtUtil;
@@ -34,12 +35,12 @@ user.setPassword(passwordEncoder.encode(user.getPassword()));
         Optional<User> userOptional = userRepository.findByemail(loginRequest.getEmail());
 
         if (userOptional.isEmpty()){
-            throw new RuntimeException("User Not Found");
+            throw new ResourceNotFoundException("User Not Found");
         }
         User user = userOptional.get();
 
         if (!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())){
-            throw new RuntimeException("Invalid Password");
+            throw new ResourceNotFoundException("Invalid Password");
         }
 
         return jwtUtil.generateToken(loginRequest.getEmail());

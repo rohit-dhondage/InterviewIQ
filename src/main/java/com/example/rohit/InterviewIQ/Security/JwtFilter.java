@@ -23,6 +23,13 @@ public class JwtFilter extends OncePerRequestFilter {
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // Allow interview bot endpoints without JWT
+        String path = request.getRequestURI();
+        if (path.startsWith("/api/interview-bot")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String header = request.getHeader("Authorization");
         if(header != null && header.startsWith("Bearer ")) {
 
@@ -52,3 +59,4 @@ public class JwtFilter extends OncePerRequestFilter {
 
     }
 }
+
