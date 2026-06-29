@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class InterviewService {
 
@@ -40,11 +41,11 @@ public class InterviewService {
     @Value("${spring.ai.openai.api-key}")
     private String openAiApiKey;
 
-    public InterviewService(ChatModel chatModel, 
-                            UserRepository userRepository, 
-                            InterviewSessionRepository sessionRepository,
-                            QuestionRepository questionRepository,
-                            AnswerRepository answerRepository) {
+    public InterviewService(ChatModel chatModel,
+            UserRepository userRepository,
+            InterviewSessionRepository sessionRepository,
+            QuestionRepository questionRepository,
+            AnswerRepository answerRepository) {
         this.chatModel = chatModel;
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
@@ -59,12 +60,13 @@ public class InterviewService {
     }
 
     /**
-     * Starts a new interview session and generates the FIRST question based on the resume.
+     * Starts a new interview session and generates the FIRST question based on the
+     * resume.
      */
     @Transactional
     public InterviewSession startInterviewSession(String resumeText) {
         User user = getAuthenticatedUser();
-        
+
         // 1. Create and save the session
         InterviewSession session = InterviewSession.builder()
                 .user(user)
@@ -75,7 +77,8 @@ public class InterviewService {
         // 2. Generate the first question
         String prompt = "You are an expert technical interviewer. Based on the candidate's resume below, " +
                 "generate the first specific, challenging interview question to start the interview. " +
-                "Do not include any greetings, introductory remarks, or filler text. Only return the question itself.\n\n" +
+                "Do not include any greetings, introductory remarks, or filler text. Only return the question itself.\n\n"
+                +
                 "Candidate Resume:\n" + resumeText;
 
         String firstQuestionPrompt;
@@ -99,7 +102,8 @@ public class InterviewService {
     }
 
     /**
-     * Submits an answer for the current question, evaluates it, and generates the next question
+     * Submits an answer for the current question, evaluates it, and generates the
+     * next question
      * dynamically based on context (up to 5 questions in total).
      */
     @Transactional
@@ -131,7 +135,7 @@ public class InterviewService {
         } catch (Exception e) {
             throw new AiServiceException("Failed to evaluate candidate answer using AI", e);
         }
-        
+
         double score = parseScore(evalResult);
         String feedback = parseFeedback(evalResult);
 
@@ -169,16 +173,21 @@ public class InterviewService {
                 } else {
                     List<Answer> answers = q.getAnswers();
                     if (answers != null && !answers.isEmpty()) {
-                        historyBuilder.append("Candidate: ").append(answers.get(answers.size() - 1).getTranscript()).append("\n");
+                        historyBuilder.append("Candidate: ").append(answers.get(answers.size() - 1).getTranscript())
+                                .append("\n");
                     }
                 }
             }
 
             // Generate next question
-            String nextPrompt = "You are an expert technical interviewer conducting a structured technical interview. " +
-                    "Based on the candidate's resume and the interview conversation history below, generate the next interview question. " +
-                    "This is question " + (nextOrderIndex + 1) + " of 5. You can choose to ask a follow-up question about their previous answer, " +
-                    "or explore a new topic from their resume. Do not include any greeting, intro, feedback, or outer formatting. Only return the question itself.\n\n" +
+            String nextPrompt = "You are an expert technical interviewer conducting a structured technical interview. "
+                    +
+                    "Based on the candidate's resume and the interview conversation history below, generate the next interview question. "
+                    +
+                    "This is question " + (nextOrderIndex + 1)
+                    + " of 5. You can choose to ask a follow-up question about their previous answer, " +
+                    "or explore a new topic from their resume. Do not include any greeting, intro, feedback, or outer formatting. Only return the question itself.\n\n"
+                    +
                     "Candidate Resume:\n" + session.getResumeText() + "\n\n" +
                     "Interview History:\n" + historyBuilder.toString();
 
@@ -231,7 +240,8 @@ public class InterviewService {
             }
         }
 
-        String summaryPrompt = "You are an expert technical recruiter. Based on the candidate's performance across " + answeredCount 
+        String summaryPrompt = "You are an expert technical recruiter. Based on the candidate's performance across "
+                + answeredCount
                 + " questions during the interview session, provide a professional, executive-level summary evaluation of their strengths, weaknesses, and overall job readiness.\n\n"
                 + "Interview Details:\n" + reportBuilder.toString();
 
@@ -241,7 +251,7 @@ public class InterviewService {
         } catch (Exception e) {
             throw new AiServiceException("Failed to generate overall feedback report using AI", e);
         }
-        
+
         session.setAiFeedback(summaryFeedback);
         sessionRepository.save(session);
     }
@@ -309,7 +319,8 @@ public class InterviewService {
         InterviewSession savedSession = sessionRepository.save(session);
 
         String prompt = "You are an expert technical interviewer. Based on the following resume text, " +
-                "generate exactly 5 specific, challenging interview questions that test the candidate's actual experience and projects.\n" +
+                "generate exactly 5 specific, challenging interview questions that test the candidate's actual experience and projects.\n"
+                +
                 "Your response must be a JSON array of strings, where each string is a single question.\n" +
                 "Candidate Resume:\n" + resumeText;
 
@@ -327,7 +338,8 @@ public class InterviewService {
 
         List<String> questionsList = new ArrayList<>();
         try {
-            String[] questionsArray = new com.fasterxml.jackson.databind.ObjectMapper().readValue(cleanJson, String[].class);
+            String[] questionsArray = new com.fasterxml.jackson.databind.ObjectMapper().readValue(cleanJson,
+                    String[].class);
             questionsList = Arrays.asList(questionsArray);
         } catch (Exception e) {
             questionsList = parseQuestionsFallback(rawOutput);
@@ -335,12 +347,11 @@ public class InterviewService {
 
         if (questionsList.isEmpty()) {
             questionsList = Arrays.asList(
-                "Can you walk me through one of the key projects listed in your resume?",
-                "What technical challenges did you face in your projects and how did you resolve them?",
-                "How do you handle scalability and performance optimization in your applications?",
-                "Which programming languages and frameworks are you most comfortable with, and why?",
-                "Can you explain your experience with database design and query optimization?"
-            );
+                    "Can you walk me through one of the key projects listed in your resume?",
+                    "What technical challenges did you face in your projects and how did you resolve them?",
+                    "How do you handle scalability and performance optimization in your applications?",
+                    "Which programming languages and frameworks are you most comfortable with, and why?",
+                    "Can you explain your experience with database design and query optimization?");
         }
 
         List<Question> questions = new ArrayList<>();
@@ -377,21 +388,21 @@ public class InterviewService {
 
         InterviewSession session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
-        
+
         session.setUserAnswerTranscript(transcript);
 
-        String feedbackPrompt = "You are an expert technical interviewer. The candidate was asked these questions:\n" 
+        String feedbackPrompt = "You are an expert technical interviewer. The candidate was asked these questions:\n"
                 + session.getGeneratedQuestions() + "\n\n"
                 + "The candidate provided the following spoken answer:\n" + transcript + "\n\n"
                 + "Provide constructive feedback on their answer. What did they do well? What could be improved? Give them a score out of 10.";
-        
+
         String feedback;
         try {
             feedback = chatModel.call(feedbackPrompt);
         } catch (Exception e) {
             throw new AiServiceException("Failed to evaluate candidate feedback using AI", e);
         }
-        
+
         session.setAiFeedback(feedback);
         sessionRepository.save(session);
         return feedback;
@@ -413,8 +424,7 @@ public class InterviewService {
             ResponseEntity<java.util.Map> response = restTemplate.postForEntity(
                     "https://api.openai.com/v1/audio/transcriptions",
                     requestEntity,
-                    java.util.Map.class
-            );
+                    java.util.Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 return (String) response.getBody().get("text");
@@ -428,7 +438,8 @@ public class InterviewService {
 
     private List<String> parseQuestionsFallback(String rawOutput) {
         List<String> list = new ArrayList<>();
-        if (rawOutput == null) return list;
+        if (rawOutput == null)
+            return list;
         String[] lines = rawOutput.split("\n");
         for (String line : lines) {
             String trimmed = line.trim();

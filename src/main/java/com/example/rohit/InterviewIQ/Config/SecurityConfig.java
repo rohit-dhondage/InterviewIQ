@@ -15,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-JwtFilter jwtFilter;
+    JwtFilter jwtFilter;
 
     public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
@@ -27,19 +27,17 @@ JwtFilter jwtFilter;
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth**","/auth/register", "/auth/login").permitAll()
+                        .requestMatchers("/auth**", "/auth/register", "/auth/login").permitAll()
                         .anyRequest().authenticated()
 
-                        // stateless Jwt requst 
-                ).sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                //Run JwtFilter before Spring login filter
+                // stateless Jwt requst
+                ).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Run JwtFilter before Spring login filter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
 
         return http.build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

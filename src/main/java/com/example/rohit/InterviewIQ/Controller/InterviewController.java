@@ -49,7 +49,8 @@ public class InterviewController {
 
     /**
      * Accepts a voice recording for the current question, evaluates it, saves it,
-     * and returns the evaluation feedback alongside the next generated question (if any).
+     * and returns the evaluation feedback alongside the next generated question (if
+     * any).
      */
     @PostMapping("/{sessionId}/questions/{questionId}/submit-answer")
     public ResponseEntity<?> submitAnswerAndGetNext(
@@ -59,8 +60,7 @@ public class InterviewController {
 
         log.info("Received answer. Session ID: {}, Question ID: {}", sessionId, questionId);
 
-        Map<String, Object> nextStep =
-                interviewService.submitAnswerAndGetNext(sessionId, questionId, audioFile);
+        Map<String, Object> nextStep = interviewService.submitAnswerAndGetNext(sessionId, questionId, audioFile);
 
         log.info("Answer processed successfully. Session ID: {}", sessionId);
 
@@ -83,7 +83,8 @@ public class InterviewController {
     }
 
     /**
-     * Retrieves the individual questions generated for a specific interview session.
+     * Retrieves the individual questions generated for a specific interview
+     * session.
      */
     @GetMapping("/{sessionId}/questions")
     public ResponseEntity<List<Question>> getQuestions(@PathVariable Long sessionId) {
@@ -98,7 +99,8 @@ public class InterviewController {
     }
 
     /**
-     * Legacy endpoint - Accepts resume text, generates 5 AI questions at once, and saves the session.
+     * Legacy endpoint - Accepts resume text, generates 5 AI questions at once, and
+     * saves the session.
      */
     @PostMapping("/generate-questions")
     public ResponseEntity<?> generateQuestions(@RequestBody Map<String, String> payload) {
@@ -120,7 +122,8 @@ public class InterviewController {
     }
 
     /**
-     * Legacy endpoint - Accepts a voice recording from the user, transcribes it, and evaluates it.
+     * Legacy endpoint - Accepts a voice recording from the user, transcribes it,
+     * and evaluates it.
      */
     @PostMapping("/{sessionId}/answer-voice")
     public ResponseEntity<?> answerWithVoice(
